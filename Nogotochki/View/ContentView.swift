@@ -35,19 +35,22 @@ struct ContentView: View {
                         .ignoresSafeArea()
 
                     VStack(spacing: 0) {
-                        Text("Твой оттенок на сегодня")
+                        Spacer().frame(height: 40)
+
+                        Text("Вот твой идеальный оттенок 💅")
                             .font(.title2)
                             .fontWeight(.semibold)
-                            .foregroundColor(.black.opacity(0.85))
-                            .padding(.top, 16)
+                            .foregroundColor(Color(red: 100/255, green: 55/255, blue: 80/255))
 
-                        Spacer(minLength: 12)
+                        Spacer().frame(height: 24)
 
                         PolaroidCard(
                             color: filteredColors[currentIndex].color,
-                            name: filteredColors[currentIndex].name
+                            name: filteredColors[currentIndex].name,
+                            totalHeight: UIScreen.main.bounds.height * 0.60
                         )
-                        .frame(maxHeight: .infinity)
+
+                        Spacer().frame(height: 24)
 
                         HStack(spacing: 16) {
                             Button(action: {
@@ -55,10 +58,10 @@ struct ContentView: View {
                             }) {
                                 Text("Не подходит")
                                     .fontWeight(.medium)
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(Color(red: 150/255, green: 100/255, blue: 120/255))
                                     .padding(.horizontal, 24)
                                     .padding(.vertical, 14)
-                                    .background(Color.gray.opacity(0.1))
+                                    .background(Color.gray.opacity(0.08))
                                     .cornerRadius(16)
                             }
 
@@ -74,7 +77,7 @@ struct ContentView: View {
                                     .cornerRadius(16)
                             }
                         }
-                        .padding(.vertical, 20)
+                        .padding(.bottom, 30)
                     }
                     .padding(.horizontal, 16)
                 }
