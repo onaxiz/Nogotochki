@@ -11,6 +11,7 @@ struct PolaroidCard: View {
     let color: Color
     let name: String
     let totalHeight: CGFloat
+    let overlayIcon: Image?
 
     var body: some View {
         let horizontalPadding: CGFloat = 16
@@ -29,14 +30,23 @@ struct PolaroidCard: View {
             VStack(spacing: 0) {
                 Spacer().frame(height: topPadding)
 
-                color
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                    )
-                    .frame(height: colorHeight)
-                    .padding(.horizontal, innerPadding)
+                ZStack {
+                    color
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                        .frame(height: colorHeight)
+                        .padding(.horizontal, innerPadding)
+
+                    if let icon = overlayIcon {
+                        icon
+                            .font(.system(size: 48))
+                            .foregroundColor(Color(red: 240/255, green: 120/255, blue: 160/255))
+                            .transition(.scale)
+                    }
+                }
 
                 Spacer().frame(height: 12)
 

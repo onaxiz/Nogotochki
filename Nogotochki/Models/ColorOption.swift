@@ -10,7 +10,6 @@ import SwiftUI
 struct ColorOption: Identifiable, Codable, Equatable {
     let id: UUID
     let name: String
-    let brand: String
     let hex: String
     let style: Style
 

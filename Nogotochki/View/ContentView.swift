@@ -14,9 +14,21 @@ struct ContentView: View {
 
     let colors = ColorLoader.loadColors()
     @State private var currentIndex = 0
+    @State private var savedColorIDs: [UUID] = ColorStorageManager.loadColors()
+    @State private var showHeart = false
+    @State private var justSaved = false
+    @State private var showSavedColors = false
 
     var filteredColors: [ColorOption] {
         return colors
+    }
+
+    var savedColors: [ColorOption] {
+        colors.filter { savedColorIDs.contains($0.id) }
+    }
+
+    var isCurrentColorSaved: Bool {
+        savedColorIDs.contains(filteredColors[currentIndex].id)
     }
 
     var body: some View {
@@ -35,7 +47,26 @@ struct ContentView: View {
                         .ignoresSafeArea()
 
                     VStack(spacing: 0) {
-                        Spacer().frame(height: 40)
+                        HStack {
+                            Button(action: {
+                                restartQuiz()
+                            }) {
+                                Label("Анкета", systemImage: "arrow.uturn.left")
+                                    .labelStyle(.titleAndIcon)
+                            }
+                            .foregroundColor(Color(red: 240/255, green: 120/255, blue: 160/255))
+
+                            Spacer()
+
+                            Button("Мои цвета") {
+                                showSavedColors = true
+                            }
+                            .foregroundColor(Color(red: 240/255, green: 120/255, blue: 160/255))
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 16)
+
+                        Spacer().frame(height: 20)
 
                         Text("Вот твой идеальный оттенок 💅")
                             .font(.title2)
@@ -47,14 +78,25 @@ struct ContentView: View {
                         PolaroidCard(
                             color: filteredColors[currentIndex].color,
                             name: filteredColors[currentIndex].name,
-                            totalHeight: UIScreen.main.bounds.height * 0.60
+                            totalHeight: UIScreen.main.bounds.height * 0.60,
+                            overlayIcon: showHeart
+                                ? Image(systemName: justSaved ? "heart.fill" : "heart.slash")
+                                : nil
                         )
+                        .id(filteredColors[currentIndex].id)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .bottom).combined(with: .opacity),
+                            removal: .opacity
+                        ))
+                        .animation(.easeOut(duration: 0.4), value: filteredColors[currentIndex].id)
 
                         Spacer().frame(height: 24)
 
                         HStack(spacing: 16) {
                             Button(action: {
-                                currentIndex = (currentIndex + 1) % filteredColors.count
+                                withAnimation {
+                                    currentIndex = (currentIndex + 1) % filteredColors.count
+                                }
                             }) {
                                 Text("Не подходит")
                                     .fontWeight(.medium)
@@ -66,22 +108,58 @@ struct ContentView: View {
                             }
 
                             Button(action: {
-                                //todo
+                                let currentColor = filteredColors[currentIndex]
+
+                                if isCurrentColorSaved {
+                                    ColorStorageManager.removeColor(id: currentColor.id)
+                                    savedColorIDs.removeAll { $0 == currentColor.id }
+                                    justSaved = false
+                                } else {
+                                    ColorStorageManager.saveColor(id: currentColor.id)
+                                    savedColorIDs.append(currentColor.id)
+                                    justSaved = true
+                                }
+
+                                withAnimation {
+                                    showHeart = true
+                                }
+
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                    withAnimation {
+                                        showHeart = false
+                                    }
+                                }
                             }) {
-                                Text("Сохранить")
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 14)
-                                    .background(Color(red: 240/255, green: 120/255, blue: 160/255))
-                                    .cornerRadius(16)
+                                HStack(spacing: 8) {
+                                    Text(isCurrentColorSaved ? "Удалить" : "Сохранить")
+                                }
+                                .frame(minWidth: 140)
+                                .fontWeight(.medium)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 14)
+                                .background(isCurrentColorSaved
+                                            ? Color(red: 180/255, green: 100/255, blue: 140/255)
+                                            : Color(red: 240/255, green: 120/255, blue: 160/255))
+                                .cornerRadius(16)
                             }
                         }
-                        .padding(.bottom, 30)
+
+                        Spacer().frame(height: 24)
                     }
                     .padding(.horizontal, 16)
                 }
+                .sheet(isPresented: $showSavedColors) {
+                    SavedColorsView(savedColors: savedColors) {
+                        showSavedColors = false
+                    }
+                }
             }
         }
+    }
+
+    private func restartQuiz() {
+        quizVM.reset()
+        showQuiz = true
     }
 }

@@ -20,7 +20,7 @@ struct QuizView: View {
                 Spacer()
 
                 if viewModel.isFinished {
-                    Button("Готово ✨") {
+                    Button("Показать результаты ✨") {
                         onFinish(viewModel.preferences)
                     }
                     .font(.system(size: 18, weight: .medium))
@@ -42,36 +42,12 @@ struct QuizView: View {
 
     @ViewBuilder
     private var stepView: some View {
-        switch viewModel.currentStep {
-        case 0:
-            questionBlock(
-                title: "Какой сейчас сезон?",
-                options: Season.allCases.map { $0.rawValue }
-            ) { value in
-                viewModel.preferences.season = Season(rawValue: value)
-                viewModel.nextStep()
-            }
-
-        case 1:
-            questionBlock(
-                title: "Цвет одежды сегодня?",
-                options: ["Чёрный", "Белый", "Бежевый", "Красный", "Голубой"]
-            ) { value in
-                viewModel.preferences.outfitColor = value
-                viewModel.nextStep()
-            }
-
-        case 2:
-            questionBlock(
-                title: "Какое настроение?",
-                options: Mood.allCases.map { $0.rawValue }
-            ) { value in
-                viewModel.preferences.mood = Mood(rawValue: value)
-                viewModel.nextStep()
-            }
-
-        default:
-            EmptyView()
+        questionBlock(
+            title: "Какое настроение?",
+            options: Mood.allCases.map { $0.rawValue }
+        ) { value in
+            viewModel.preferences.mood = Mood(rawValue: value)
+            viewModel.isFinished = true
         }
     }
 
@@ -88,7 +64,7 @@ struct QuizView: View {
                 }) {
                     Text(option)
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(Color(red: 240/255, green: 120/255, blue: 160/255)) 
+                        .foregroundColor(Color(red: 240/255, green: 120/255, blue: 160/255))
                         .padding(.vertical, 6)
                 }
             }
